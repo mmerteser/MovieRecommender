@@ -20,6 +20,7 @@ namespace MovieRecommender.DataAccess
 
             services.AddScoped<IMovieRepository, MovieRepository>();
             services.AddScoped<IMovieRatingRepository, MovieRatingRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             AddDataSeeding();
         }

@@ -1,5 +1,8 @@
-﻿namespace MovieRecommender.Application.IntegratedApplicationModels.ResponseModel
+﻿namespace MovieRecommender.Application.Models.IntegratedApplicationModels.ResponseModel
 {
+    /// <summary>
+    /// TMDB get movie json model
+    /// </summary>
     public class TmdbGetMovieModel : TmdbBaseResponse
     {
         public int Page { get; set; }

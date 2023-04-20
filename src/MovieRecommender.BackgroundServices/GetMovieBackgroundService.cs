@@ -3,16 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MovieRecommender.Application;
 using MovieRecommender.Application.AbstractServices;
-using MovieRecommender.Application.IntegratedApplicationModels.ResponseModel;
 using MovieRecommender.Application.Repositories;
-using MovieRecommender.Application.Utilities.HttpService;
-using MovieRecommender.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MovieRecommender.BackgroundServices
 {
@@ -45,15 +36,15 @@ namespace MovieRecommender.BackgroundServices
 
             IMovieService _movieService = scope.ServiceProvider.GetRequiredService<IMovieService>();
             IMovieRepository _movieRepository = scope.ServiceProvider.GetRequiredService<IMovieRepository>();
-            
+
             _movieRepository = scope.ServiceProvider.GetRequiredService<IMovieRepository>();
 
-            var movies = _movieService.GetMovies().GetAwaiter().GetResult();
+            var movies = _movieService.GetMoviesFromTmdb().GetAwaiter().GetResult();
 
             if (!movies.Success)
                 return;
 
-            _movieService.SaveMovies(movies.Data);
+            _movieService.SaveMovies(movies.Data).GetAwaiter().GetResult();
         }
     }
 }

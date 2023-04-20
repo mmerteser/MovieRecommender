@@ -11,7 +11,9 @@ namespace MovieRecommender.Application.Repositories
 
 
         IQueryable<TEntity> AsQueryable();
-        Task<IEnumerable<TEntity>> GetAllAsync(bool noTracking = true);
+        Task<IEnumerable<TEntity>> GetAllAsync(bool noTracking = true
+            , Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null
+            , params Expression<Func<TEntity, object>>[] includes);
         Task<IEnumerable<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> filter, bool noTracking = true
             , Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null
             , params Expression<Func<TEntity, object>>[] includes);

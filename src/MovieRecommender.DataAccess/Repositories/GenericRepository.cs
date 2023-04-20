@@ -55,9 +55,20 @@ namespace MovieRecommender.DataAccess.Repositories
             return query;
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync(bool noTracking = true)
+        public virtual async Task<IEnumerable<T>> GetAllAsync(bool noTracking = true
+                                                            , Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null
+                                                            , params Expression<Func<T, object>>[] includes)
         {
             var query = Table.AsQueryable();
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            if (orderBy != null)
+                query = orderBy(query);
+
             if (noTracking)
                 query = query.AsNoTracking();
 

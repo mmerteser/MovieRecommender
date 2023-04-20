@@ -1,36 +1,51 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MovieRecommender.Application.IntegratedApplicationModels.ResponseModel;
-using MovieRecommender.Application.Repositories;
-using MovieRecommender.Application.Utilities.HttpService;
-using MovieRecommender.Core.Entities;
+using MovieRecommender.Application.AbstractServices;
+using MovieRecommender.Application.Models.RequestModels.MovieModels;
 
 namespace MovieRecommender.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MoviesController : ControllerBase
     {
-        private readonly IHttpService _httpService;
-        private readonly IMovieRepository _movieRepository;
-        private readonly IMapper _mapper;
-        public MoviesController(IHttpService httpService, IMovieRepository movieRepository, IMapper mapper)
+        private readonly IMovieService _movieService;
+
+        public MoviesController(IMovieService movieService)
         {
-            _httpService = httpService;
-            _movieRepository = movieRepository;
-            _mapper = mapper;
+            _movieService = movieService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var result = await _httpService.GetAsync<TmdbGetMovieModel>("https://api.themoviedb.org/3/movie/popular?api_key=a40b675d40f769ca7dae6d54b2bc961c&language=tr-TR&page=20");
+            var result = await _movieService.GetAll();
 
-            var mappedData = _mapper.Map<List<Movie>>(result.Data.Results);
+            if (!result.Success)
+                return BadRequest(result);
 
-            await _movieRepository.AddRangeAsync(mappedData);
-            await _movieRepository.SaveAsync();
+            return Ok(result);
+        }
+
+        [HttpGet("Id={id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _movieService.GetById(id);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("vote")]
+        public async Task<IActionResult> VoteMovie([FromBody] MovieVoteRequest request)
+        {
+            var result = await _movieService.VoteMovie(request);
+
+            if (!result.Success)
+                return BadRequest(result);
 
             return Ok(result);
         }

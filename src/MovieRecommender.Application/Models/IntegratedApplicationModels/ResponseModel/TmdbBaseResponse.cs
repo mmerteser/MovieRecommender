@@ -1,4 +1,4 @@
-﻿namespace MovieRecommender.Application.IntegratedApplicationModels.ResponseModel
+﻿namespace MovieRecommender.Application.Models.IntegratedApplicationModels.ResponseModel
 {
     public class TmdbBaseResponse
     {
