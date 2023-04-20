@@ -11,6 +11,7 @@ namespace MovieRecommender.Application.AbstractServices
         Task<IDataResult<GetMovieVM>> GetAll();
         Task<IDataResult<MovieVM>> GetById(int id);
         Task<IResult> VoteMovie(MovieVoteRequest request);
+        Task<IResult> SendMovieRecommendMail(RecommendMovieRequest recommendMovie);
         Task<IResult> SaveMovies(TmdbGetMovieModel tmdbMovies);
     }
 }

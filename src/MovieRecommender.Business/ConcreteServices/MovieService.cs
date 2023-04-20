@@ -21,6 +21,7 @@ namespace MovieRecommender.Business.ConcreteServices
         private readonly IMovieRatingRepository _movieRatingRepository;
         private readonly IUserRepository _userRepository;
         private readonly IHttpService _httpService;
+        private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
         private readonly ILogger<MovieService> _logger;
         public MovieService(IMovieRepository movieRepository,
@@ -28,7 +29,8 @@ namespace MovieRecommender.Business.ConcreteServices
                             IHttpService httpService,
                             IMapper mapper,
                             ILogger<MovieService> logger,
-                            IUserRepository userRepository)
+                            IUserRepository userRepository,
+                            IEmailService emailService)
         {
             _movieRepository = movieRepository;
             _httpService = httpService;
@@ -36,6 +38,7 @@ namespace MovieRecommender.Business.ConcreteServices
             _logger = logger;
             _userRepository = userRepository;
             _movieRatingRepository = movieRatingRepository;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -124,8 +127,11 @@ namespace MovieRecommender.Business.ConcreteServices
                 return new ErrorResult(Messages.UnexpectedError);
             }
         }
-
-        public async Task<IResult> VoteMovie(MovieVoteRequest request)
+        /// <summary>
+        /// Film için oy ve yorum kaydeder.
+        /// </summary>
+        /// <param name="movieVote">Filme verilen oy ve yorum girilmelidir</param>
+        public async Task<IResult> VoteMovie(MovieVoteRequest movieVote)
         {
             try
             {
@@ -134,7 +140,7 @@ namespace MovieRecommender.Business.ConcreteServices
                 if (!user.Success)
                     return new ErrorResult(user.Message);
 
-                var movie = await _movieRepository.FirstOrDefaultAsync(i => i.Id == request.MovieId, includes: i => i.MovieRatings);
+                var movie = await _movieRepository.FirstOrDefaultAsync(i => i.Id == movieVote.MovieId, includes: i => i.MovieRatings);
 
                 var control = BusinessRules.Run(CheckIfExistsMovie(movie), CheckIfAlreadyVoted(movie, user.Data));
 
@@ -143,10 +149,10 @@ namespace MovieRecommender.Business.ConcreteServices
 
                 await _movieRatingRepository.AddAsync(new MovieRating
                 {
-                    Note = request.Note,
-                    Rate = request.Vote,
+                    Note = movieVote.Note ?? String.Empty,
+                    Rate = movieVote.Vote,
                     UserId = user.Data,
-                    MovieId = request.MovieId
+                    MovieId = movieVote.MovieId
                 });
 
                 int affectedRowCount = await _movieRatingRepository.SaveAsync();
@@ -163,6 +169,10 @@ namespace MovieRecommender.Business.ConcreteServices
             }
         }
 
+        /// <summary>
+        /// Film db'de bulunuyor mu kontrolü yapılır.
+        /// </summary>
+        /// <param name="movie"></param>
         private IResult CheckIfExistsMovie(Movie movie)
         {
             if (movie is null)
@@ -171,12 +181,36 @@ namespace MovieRecommender.Business.ConcreteServices
             return new SuccessResult();
         }
 
+        /// <summary>
+        /// Kullanıcı aynı filme daha önce yorumda bulunmuş mu kontrolü yapılır.
+        /// </summary>
+        /// <param name="movie"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         private IResult CheckIfAlreadyVoted(Movie movie, int userId)
         {
             if (movie.MovieRatings.Any(i => i.UserId == userId))
                 return new ErrorResult("Aynı filme tekrar yorum yapamazsınız");
 
             return new SuccessResult();
+        }
+
+        public async Task<IResult> SendMovieRecommendMail(RecommendMovieRequest recommendMovie)
+        {
+            try
+            {
+                var movie = await _movieRepository.GetByIdAsync(recommendMovie.MovieId);
+
+                if (movie is null)
+                    return new ErrorResult("Film bulunamadı");
+
+                return await _emailService.SendMovieRecommendingMailAsync(recommendMovie.ToEmail, movie);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical($"SendMovieRecommendMail Error: {ex.Message}");
+                throw;
+            }
         }
     }
 }

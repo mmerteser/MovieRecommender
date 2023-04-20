@@ -12,6 +12,7 @@ namespace MovieRecommender.Business
             services.AddScoped<IHttpService, HttpService>();
             services.AddScoped<IMovieService, MovieService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IEmailService, EmailService>();
         }
     }
 }

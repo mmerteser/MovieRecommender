@@ -49,5 +49,16 @@ namespace MovieRecommender.WebAPI.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("recommend")]
+        public async Task<IActionResult> RecommendMovie([FromBody] RecommendMovieRequest request)
+        {
+            var result = await _movieService.SendMovieRecommendMail(request);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
     }
 }
