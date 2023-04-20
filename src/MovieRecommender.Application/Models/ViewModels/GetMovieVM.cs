@@ -14,6 +14,7 @@ namespace MovieRecommender.Application.Models.ViewModels
 
     public class MovieVM
     {
+        public int MovieId { get; set; }
         public bool Adult { get; set; }
         public string? BackdropPath { get; set; }
         public int? TmdbId { get; set; }

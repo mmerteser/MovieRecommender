@@ -53,6 +53,9 @@ namespace MovieRecommender.Business.ConcreteServices
 
                 var movies = await _movieRepository.GetAllMoviesAsync();
 
+                if (!movies.Any())
+                    return new ErrorDataResult<GetMovieVM>(movieVm, Messages.NotFound);
+
                 movieVm.Movies = movies;
 
                 return new SuccessDataResult<GetMovieVM>(movieVm);
@@ -73,6 +76,9 @@ namespace MovieRecommender.Business.ConcreteServices
                 _logger.LogInformation("GetAllMovies was started");
 
                 var movies = await _movieRepository.GetMovieByIdAsync(id);
+
+                if (movies is null)
+                    return new ErrorDataResult<MovieVM>(movies, Messages.NotFound);
 
                 movieVm = movies;
 
@@ -157,7 +163,7 @@ namespace MovieRecommender.Business.ConcreteServices
 
                 int affectedRowCount = await _movieRatingRepository.SaveAsync();
 
-                if(affectedRowCount <= 0) 
+                if (affectedRowCount <= 0)
                     return new ErrorResult();
 
                 return new SuccessResult();

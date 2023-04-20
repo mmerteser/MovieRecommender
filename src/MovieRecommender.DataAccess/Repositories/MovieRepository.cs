@@ -29,11 +29,12 @@ namespace MovieRecommender.DataAccess.Repositories
             {
                 var query = await _context.Movies.Include(i => i.MovieRatings).ThenInclude(i => i.User).ToListAsync();
 
-                if (query is null)
+                if (query is null || !query.Any())
                     return new List<MovieVM>();
 
                 var result = query.Select(i => new MovieVM
                 {
+                    MovieId = i.Id,
                     Adult = i.Adult,
                     BackdropPath = i.BackdropPath,
                     OriginalLanguage = i.OriginalLanguage,
@@ -41,13 +42,13 @@ namespace MovieRecommender.DataAccess.Repositories
                     Overview = i.Overview,
                     Popularity = i.Popularity,
                     PosterPath = i.PosterPath,
-                    ReleaseDate = i.ReleaseDate,
+                    ReleaseDate = i.ReleaseDate ?? DateTime.MinValue,
                     Title = i.Title,
                     TmdbId = i.TmdbId,
                     Video = i.Video,
-                    VoteCount = i.MovieRatings.Any() ? 0d : i.MovieRatings.Count(),
-                    VoutAverage = i.MovieRatings.Any() ? 0d : i.MovieRatings.Average(i => i.Rate),
-                    MovieRatings = i.MovieRatings.Any() ? new() : i.MovieRatings.Select(rating => new MovieRatingVM
+                    VoteCount = !i.MovieRatings.Any() ? 0d : i.MovieRatings.Count(),
+                    VoutAverage = !i.MovieRatings.Any() ? 0d : i.MovieRatings.Average(i => i.Rate),
+                    MovieRatings = !i.MovieRatings.Any() ? new() : i.MovieRatings.Select(rating => new MovieRatingVM
                     {
                         Rate = rating.Rate,
                         Note = rating.Note,
@@ -71,10 +72,11 @@ namespace MovieRecommender.DataAccess.Repositories
                 var query = await _context.Movies.Include(i => i.MovieRatings).ThenInclude(i => i.User).FirstOrDefaultAsync(i => i.Id == id);
 
                 if (query is null)
-                    return new();
+                    return null;
 
                 var result = new MovieVM
                 {
+                    MovieId = query.Id,
                     Adult = query.Adult,
                     BackdropPath = query.BackdropPath,
                     OriginalLanguage = query.OriginalLanguage,
