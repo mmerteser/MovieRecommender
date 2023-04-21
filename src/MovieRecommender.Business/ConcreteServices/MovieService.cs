@@ -6,6 +6,7 @@ using MovieRecommender.Application.Constants;
 using MovieRecommender.Application.Models.IntegratedApplicationModels.ResponseModel;
 using MovieRecommender.Application.Models.RequestModels.MovieModels;
 using MovieRecommender.Application.Models.ViewModels;
+using MovieRecommender.Application.Queue;
 using MovieRecommender.Application.Repositories;
 using MovieRecommender.Application.Utilities;
 using MovieRecommender.Application.Utilities.HttpService;
@@ -218,5 +219,6 @@ namespace MovieRecommender.Business.ConcreteServices
                 throw;
             }
         }
+
     }
 }
