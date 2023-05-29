@@ -27,8 +27,7 @@ namespace MovieRecommender.DataAccess
 
         public static void AddDataSeeding()
         {
-            var seedData = new DataSeeding();
-            seedData.SeedAsync().GetAwaiter().GetResult();
+            DataSeeding.SeedAsync().GetAwaiter().GetResult();
         }
     }
 }

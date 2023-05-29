@@ -46,27 +46,5 @@ namespace MovieRecommender.Business.ConcreteServices
                 return new ErrorResult();
             }
         }
-
-        public async Task<IResult> SendMovieRecommendingMailAsync(string email, Movie movie)
-        {
-            var userId = _userRepository.GetCurrentUserIdFromContext();
-
-            if (!userId.Success)
-                return new ErrorResult(userId.Message);
-
-            var user = await _userRepository.GetByIdAsync(userId.Data);
-
-            string body = $"""
-                Merhaba,
-                
-                {user.FirstLastName} isimli kullanıcı sizin için '{movie.Title}' isimli filmi önerdi.
-
-                Film açıklaması: {movie.Overview};
-
-                İyi günler
-                """;
-
-            return SendEmail(email, body);
-        }
     }
 }

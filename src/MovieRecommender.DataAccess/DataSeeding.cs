@@ -8,7 +8,7 @@ namespace MovieRecommender.DataAccess
 {
     public class DataSeeding
     {
-        public async Task SeedAsync()
+        public static async Task SeedAsync()
         {
             var dbContextBuilder = new DbContextOptionsBuilder()
                 .UseSqlServer(Configuration.ConnectionString);

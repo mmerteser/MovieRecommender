@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MovieRecommender.Application.Models.RequestModels.MovieModels;
 using MovieRecommender.Application.Models.ViewModels;
 using MovieRecommender.Application.Repositories;
 using MovieRecommender.Core.Entities;
@@ -23,11 +24,16 @@ namespace MovieRecommender.DataAccess.Repositories
             _logger = logger;
         }
 
-        public async Task<IEnumerable<MovieVM>> GetAllMoviesAsync()
+        public async Task<IEnumerable<MovieVM>> GetAllMoviesAsync(GetMovieRequest request)
         {
             try
             {
-                var query = await _context.Movies.Include(i => i.MovieRatings).ThenInclude(i => i.User).ToListAsync();
+                var query = await _context.Movies.Include(i => i.MovieRatings)
+                                                 .ThenInclude(i => i.User)
+                                                 .OrderBy(i => i.CreatedDate)
+                                                 .Skip((request.PageNumber - 1) * request.PageSize)
+                                                 .Take(request.PageSize)
+                                                 .ToListAsync();
 
                 if (query is null || !query.Any())
                     return new List<MovieVM>();

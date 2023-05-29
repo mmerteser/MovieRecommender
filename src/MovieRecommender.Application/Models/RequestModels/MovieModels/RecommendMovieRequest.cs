@@ -4,5 +4,6 @@
     {
         public int MovieId { get; set; }
         public string ToEmail { get; set; }
+        public int UserId;
     }
 }

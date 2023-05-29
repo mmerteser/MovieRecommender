@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MovieRecommender.Application.AbstractServices;
+using MovieRecommender.Application.Constants;
 using MovieRecommender.Application.Models.RequestModels.MovieModels;
 
 namespace MovieRecommender.WebAPI.Controllers
@@ -18,9 +19,9 @@ namespace MovieRecommender.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] GetMovieRequest request)
         {
-            var result = await _movieService.GetAll();
+            var result = await _movieService.GetAll(request);
 
             if (!result.Success)
                 return BadRequest(result);
@@ -53,6 +54,10 @@ namespace MovieRecommender.WebAPI.Controllers
         [HttpPost("recommend")]
         public async Task<IActionResult> RecommendMovie([FromBody] RecommendMovieRequest request)
         {
+            int userId = int.Parse(HttpContext.User.FindFirst(CustomClaimTypes.UserId).Value);
+
+            request.UserId = userId;
+
             var result = await _movieService.SendMovieRecommendMail(request);
 
             if (!result.Success)

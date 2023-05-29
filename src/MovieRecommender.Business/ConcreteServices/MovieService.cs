@@ -45,7 +45,7 @@ namespace MovieRecommender.Business.ConcreteServices
         /// <summary>
         /// Db'deki tüm movie kayıtlarını ratingleri ile birlikte döner.
         /// </summary>
-        public async Task<IDataResult<GetMovieVM>> GetAll()
+        public async Task<IDataResult<GetMovieVM>> GetAll(GetMovieRequest request)
         {
             var movieVm = new GetMovieVM();
             try
@@ -211,13 +211,30 @@ namespace MovieRecommender.Business.ConcreteServices
                 if (movie is null)
                     return new ErrorResult("Film bulunamadı");
 
-                return await _emailService.SendMovieRecommendingMailAsync(recommendMovie.ToEmail, movie);
+                return await SendMovieRecommendingMailAsync(recommendMovie.UserId, recommendMovie.ToEmail, movie);
             }
             catch (Exception ex)
             {
                 _logger.LogCritical($"SendMovieRecommendMail Error: {ex.Message}");
                 throw;
             }
+        }
+
+        private async Task<IResult> SendMovieRecommendingMailAsync(int userId, string email, Movie movie)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            string body = $"""
+                Merhaba,
+                
+                {user.FirstLastName} isimli kullanıcı sizin için '{movie.Title}' isimli filmi önerdi.
+
+                Film açıklaması: {movie.Overview};
+
+                İyi günler
+                """;
+
+            return _emailService.SendEmail(email, body);
         }
 
     }
